@@ -17,7 +17,7 @@ if str(APP_DIR) not in sys.path:
 
 # Import Settings and Models
 from dwg.config import settings
-from dwg.storage.models import Base  # All SQLAlchemy models register to Base.metadata
+from dwg.domain.entities import Base  # All SQLAlchemy models register to Base.metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
