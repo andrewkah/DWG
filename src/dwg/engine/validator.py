@@ -1,19 +1,9 @@
-from dwg.domain.dsl import ConditionModel
+from dwg.domain.dsl import ConditionModel, TransitionModel
 import re
 from pydantic import field_validator, model_validator
 
-
-FIELD_PATTERN = re.compile(r"^[a-z0-9_]{1,64}$")
-
 class ConditionValidator(ConditionModel):
     """Validation model for workflow conditions."""
-    @field_validator("field")
-    @classmethod
-    def validate_field(cls, f: str) -> str:
-        if not FIELD_PATTERN.match(f):
-            raise ValueError("Input must be 1-64 characters long and contain "
-                "only lowercase letters, numbers, or underscores.")
-        return f
     
     @field_validator("operator")
     @classmethod
@@ -46,4 +36,3 @@ class ConditionValidator(ConditionModel):
 
         return condition_class
             
-    
