@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class ConditionModel(BaseModel):
     field: str = Field(..., pattern=r"^[a-z0-9_]{1,64}$")
-    operator: Literal["equals", "not_equals", "gt", "gte", "lt", "lte", "in", "not_in", "equals"]
+    operator: Literal["equals", "not_equals", "gt", "gte", "lt", "lte", "in", "not_in", "exists"]
     value: Union[str, bool, int, float, List[Union[str, bool, float, int]]]
     
 class TransitionModel(BaseModel):
