@@ -1,0 +1,2 @@
+    """ UssdProviderAdapter (Abstract SPI)
+    """
