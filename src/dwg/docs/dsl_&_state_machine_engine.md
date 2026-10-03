@@ -37,6 +37,7 @@ This specification freezes the **Workflow DSL v1.0 contract** and defines the **
 Before looking at the JSON Schema, we must define how inputs, validations, and transitions are evaluated.
 
 ### 1.1 Case 1: Type Mismatch (`"age": "hello"`)
+
 * **Field Definition:** `{"name": "applicant_age", "type": "integer", "validation": {"min": 18, "max": 99}}`
 * **Raw Input Received:** `"hello"`
 * **Evaluation Pipeline:**
@@ -52,6 +53,7 @@ Before looking at the JSON Schema, we must define how inputs, validations, and t
 ---
 
 ### 1.2 Case 2: Constraint Violation (`age = 17` when `min = 18`)
+
 * **Field Definition:** `{"name": "applicant_age", "type": "integer", "validation": {"min": 18, "max": 99}}`
 * **Raw Input Received:** `"17"`
 * **Evaluation Pipeline:**
@@ -66,6 +68,7 @@ Before looking at the JSON Schema, we must define how inputs, validations, and t
 ---
 
 ### 1.3 Case 3: Conditional Transition Structure
+
 Transitions are evaluated **in declaration order**. The first transition whose predicate evaluates to `true` is selected. If a transition has no `condition` block, it is treated as an **unconditional transition** (always `true`).
 
 ```json
@@ -90,8 +93,9 @@ Transitions are evaluated **in declaration order**. The first transition whose p
 ```
 
 #### Supported Predicate Operators (DSL v1.0)
+
 | Operator | Supported Data Types | Evaluation Logic | Example |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `equals` | `string`, `integer`, `decimal`, `boolean` | `collected_data[field] == value` | `{"field": "employed", "operator": "equals", "value": true}` |
 | `not_equals` | `string`, `integer`, `decimal`, `boolean` | `collected_data[field] != value` | `{"field": "role", "operator": "not_equals", "value": "ADMIN"}` |
 | `gt` | `integer`, `decimal` | `collected_data[field] > value` | `{"field": "age", "operator": "gt", "value": 65}` |
@@ -99,7 +103,7 @@ Transitions are evaluated **in declaration order**. The first transition whose p
 | `lt` | `integer`, `decimal` | `collected_data[field] < value` | `{"field": "salary", "operator": "lt", "value": 50000}` |
 | `lte` | `integer`, `decimal` | `collected_data[field] <= value` | `{"field": "score", "operator": "lte", "value": 100}` |
 | `in` | `string`, `integer` | `collected_data[field] in list` | `{"field": "district", "operator": "in", "value": ["Gulu", "Arua"]}` |
-| `not_in` | `string`, `integer` | `collected_data[field] not in list`| `{"field": "category", "operator": "not_in", "value": ["BLOCKED"]}` |
+| `not_in` | `string`, `integer` | `collected_data[field] not in list` | `{"field": "category", "operator": "not_in", "value": ["BLOCKED"]}` |
 | `exists` | Any | `field in collected_data` | `{"field": "email", "operator": "exists", "value": true}` |
 
 ---
@@ -297,6 +301,7 @@ This JSON Schema (Draft-07 standard) must be used by the Authoring API to valida
 # PART 2: Formal State Machine Engine Specification
 
 ## 1. Reference Workflow Definition
+
 The reference workflow for our state machine behavior specification:
 
 ```text
@@ -385,6 +390,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
 ---
 
 ### Scenario 1: Valid Input (Normal State Progression)
+
 * **Pre-condition:** Session is `ACTIVE` at state `full_name`. User submits `"Sarah Nabukeera"`.
 * **Engine Processing:**
   1. Validates string length ($15 \ge 3$ and $\le 60$). Passes.
@@ -395,6 +401,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
   6. Increments `row_version` from `1` to `2`.
 * **Redis Write:** Atomic update to `sess:{id}` with refreshed 180s TTL.
 * **REST Response (HTTP 200 OK):**
+
   ```json
   {
     "session_id": "8f3b2e7d-94c1-4b3e-8c7a-123456789abc",
@@ -410,11 +417,13 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
     }
   }
   ```
+
 * **USSD Response:** `CON Enter your age in years:`
 
 ---
 
 ### Scenario 2: Invalid Input — Type Mismatch
+
 * **Pre-condition:** Session is `ACTIVE` at state `applicant_age`. User submits `"twenty"`.
 * **Engine Processing:**
   1. Attempts integer coercion: fails.
@@ -423,6 +432,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
   4. `collected_data` remains unchanged.
 * **Redis Write:** Extends session TTL (180s); session state data is **not** mutated.
 * **REST Response (HTTP 422 Unprocessable Entity):**
+
   ```json
   {
     "error": {
@@ -433,11 +443,13 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
     }
   }
   ```
+
 * **USSD Response:** `CON Invalid number. Please enter a valid whole number:\nEnter your age in years:`
 
 ---
 
 ### Scenario 3: Invalid Input — Constraint Violation
+
 * **Pre-condition:** Session is `ACTIVE` at state `applicant_age`. User submits `"14"`.
 * **Engine Processing:**
   1. Integer coercion succeeds (`14`).
@@ -445,6 +457,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
   3. Sets error context: `{"code": "CONSTRAINT_VIOLATION", "rule": "min", "limit": 18}`.
   4. `current_state` remains `"applicant_age"`.
 * **REST Response (HTTP 422 Unprocessable Entity):**
+
   ```json
   {
     "error": {
@@ -456,11 +469,13 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
     }
   }
   ```
+
 * **USSD Response:** `CON Value too low. Must be at least 18:\nEnter your age in years:`
 
 ---
 
 ### Scenario 4: No Matching Transition (Graph Dead End)
+
 * **Pre-condition:** Session is `ACTIVE` at state `is_employed`. `collected_data["employed"] = "UNKNOWN"`.
 * **Engine Processing:**
   1. Evaluates Transition 1 (`employed == true`): `FALSE`.
@@ -469,6 +484,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
   4. Graph execution enters a deadlock. Engine halts and marks session `status = "FAILED"`.
 * **Observability:** Emits `ERROR` log with alert `ENGINE_GRAPH_DEADLOCK`.
 * **REST Response (HTTP 500 Internal Server Error):**
+
   ```json
   {
     "error": {
@@ -477,16 +493,19 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
     }
   }
   ```
+
 * **USSD Response:** `END An unexpected system error occurred. Please contact support.`
 
 ---
 
 ### Scenario 5: Expired Session (TTL Elapsed)
+
 * **Pre-condition:** User dials turn 2 after 10 minutes. Key `sess:{id}` has been evicted by Redis.
 * **Engine Processing:**
   1. Adapter queries `sess:{id}` in Redis $\rightarrow$ Returns `NULL`.
   2. Adapter intercepts `NULL` before invoking Engine.
 * **REST Response (HTTP 410 Gone):**
+
   ```json
   {
     "error": {
@@ -495,11 +514,13 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
     }
   }
   ```
+
 * **USSD Response:** `END Your session has expired. Please dial again.`
 
 ---
 
 ### Scenario 6: Cancelled Session
+
 * **Pre-condition:** Session is `ACTIVE` at state `confirm`. User selects option `2` ("Cancel").
 * **Engine Processing:**
   1. Input validates as choice `2` (`_confirm = false`).
@@ -508,6 +529,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
   4. Engine marks session `status = "CANCELLED"`.
   5. **Durable Database Action:** Zero database writes to `submissions`.
 * **REST Response (HTTP 200 OK):**
+
   ```json
   {
     "session_id": "8f3b2e7d-94c1-4b3e-8c7a-123456789abc",
@@ -515,23 +537,28 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
     "message": "Application cancelled. No data was saved."
   }
   ```
+
 * **USSD Response:** `END Application cancelled. No data was saved.`
 
 ---
 
 ### Scenario 7: Completed Session (Terminal Success)
+
 * **Pre-condition:** Session is `ACTIVE` at state `confirm`. User selects option `1` ("Confirm").
 * **Engine Processing:**
   1. Input validates as choice `1` (`_confirm = true`).
   2. Routes to state `complete_state` (`kind: terminal`, `terminal_status: "COMPLETED"`).
   3. Engine triggers **Durable Submission Pipeline**:
      * Inserts row into PostgreSQL `submissions`:
+
        ```sql
        INSERT INTO submissions (organization_id, workflow_version_id, session_id, channel, subscriber_hash, data)
        VALUES ('b1a2...', 'c5d6...', '8f3b...', 'ussd', 'hash(phone)', '{"applicant_name": "Sarah", ...}'::jsonb);
        ```
+
      * Sets Redis session `status = "COMPLETED"`.
 * **REST Response (HTTP 200 OK):**
+
   ```json
   {
     "session_id": "8f3b2e7d-94c1-4b3e-8c7a-123456789abc",
@@ -540,11 +567,13 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
     "message": "Thank you! Your application has been submitted successfully."
   }
   ```
+
 * **USSD Response:** `END Thank you! Your application has been submitted successfully.`
 
 ---
 
 ### Scenario 8: Duplicate Request (Aggregator Retry / Replay)
+
 * **Pre-condition:** Network lag causes telco aggregator to resend HTTP POST for turn 1 with identical payload (`sessionId=AT123`, `text=Sarah`).
 * **Engine Processing:**
   1. USSD Adapter computes request signature hash: `MD5(africas_talking:AT123:Sarah)`.
@@ -556,6 +585,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
 ---
 
 ### Scenario 9: Concurrent Request Race Condition
+
 * **Pre-condition:** Two HTTP requests ($R_1$ and $R_2$) for `session_id = 8f3b...` hit Worker 1 and Worker 2 simultaneously when `row_version = 3`.
 * **Worker Execution:**
   1. Both workers load `sess:{id}` with `row_version = 3`.
@@ -566,6 +596,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
      $$\text{SET if } \text{row\_version} == 3 \rightarrow \text{FAILS. (Current version is 4)}$$
 * **Worker 2 Action:** Aborts transaction, rolls back local state, and rejects request.
 * **REST Response to Loser (HTTP 409 Conflict):**
+
   ```json
   {
     "error": {
@@ -578,6 +609,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
 ---
 
 ### Scenario 10: Unknown / Corrupted State ID
+
 * **Pre-condition:** A session in Redis points to `current_state_id = "deleted_step"`, which does not exist in the pinned `WorkflowVersion` definition.
 * **Engine Processing:**
   1. Engine loads workflow JSON and searches `states` for `id == "deleted_step"`.
@@ -585,6 +617,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
   3. Engine halts execution; transitions session `status = "FAILED"`.
   4. Emits `CRITICAL` log: `STATE_POINTER_CORRUPTION`.
 * **REST Response (HTTP 500 Internal Server Error):**
+
   ```json
   {
     "error": {
@@ -593,11 +626,13 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
     }
   }
   ```
+
 * **USSD Response:** `END A system integrity error occurred. Please dial again.`
 
 ---
 
 ### Scenario 11: Execution Loop Breaker
+
 * **Pre-condition:** A poorly authored workflow contains a logical cycle (State A $\rightarrow$ State B $\rightarrow$ State A).
 * **Engine Processing:**
   1. On each transition, `transition_count` increments by 1.
@@ -606,6 +641,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
      * Sets session `status = "FAILED"`.
      * Emits `CRITICAL` log: `MAX_TRANSITION_LIMIT_EXCEEDED`.
 * **REST Response (HTTP 508 Loop Detected):**
+
   ```json
   {
     "error": {
@@ -614,6 +650,7 @@ $$T(S, C) \rightarrow \langle S', \text{Result} \rangle$$
     }
   }
   ```
+
 * **USSD Response:** `END Session terminated: Maximum step limit reached.`
 
 ---
@@ -642,4 +679,91 @@ This specification forms the basis for Milestone 1 unit and integration test ass
 |                                    | - Scenario 7: Completed session writes Postgres DB|
 |                                    | - Scenario 5: Expired Redis key returns HTTP 410  |
 +------------------------------------+---------------------------------------------------+
+```
+
+# PART 4: Production FastAPI Project Structure
+
+The project follows a **Clean Architecture / Ports & Adapters (Hexagonal)** layout implemented within a Python Modular monolith.
+
+```text
+dwg-backend/
+├── pyproject.toml                 # Poetry/Hatch/Pip dependencies & tool config
+├── Dockerfile                     # Multi-stage production container build
+├── docker-compose.yml             # Local Postgres & Redis development infrastructure
+├── README.md
+│
+├── alembic/                       # Database migrations
+│   ├── env.py
+│   └── versions/
+│       └── 0001_initial_schema.py
+│
+├── src/
+│   └── dwg/
+│       ├── __init__.py
+│       ├── main.py                # FastAPI application entrypoint & middleware assembly
+│       ├── config.py              # Pydantic-Settings environment configuration
+│       │
+│       ├── domain/                # Pure domain models (zero framework dependencies)
+│       │   ├── __init__.py
+│       │   ├── entities.py        # Organization, Workflow, Version, Session entities
+│       │   ├── dsl.py             # Pydantic models for the JSON Schema DSL
+│       │   └── errors.py          # Domain exceptions (ValidationError, StateMismatchError)
+│       │
+│       ├── engine/                # Core Workflow State Machine (Pure Python)
+│       │   ├── __init__.py
+│       │   ├── state_machine.py   # State transition & condition evaluation engine
+│       │   ├── validator.py       # Input validation logic (type coercion, min/max rules)
+│       │   └── types.py           # Engine command & result interfaces
+│       │
+│       ├── adapters/              # Channel & Provider Protocol Adapters
+│       │   ├── __init__.py
+│       │   ├── ussd/
+│       │   │   ├── base.py        # UssdProviderAdapter (Abstract SPI)
+│       │   │   ├── africas_talking.py # Africa's Talking webhook adapter
+│       │   │   ├── mock.py        # Mock adapter for local CLI & CI testing
+│       │   │   └── renderer.py    # Plaintext CON/END formatting & length validation
+│       │   └── rest/
+│       │       └── serializer.py  # Canonical engine to REST JSON view models
+│       │
+│       ├── storage/               # Persistence Layer (PostgreSQL & Redis)
+│       │   ├── __init__.py
+│       │   ├── redis_session.py   # Redis session repository (TTL, CAS optimistic lock)
+│       │   ├── redis_idempotency.py # Idempotency cache client
+│       │   ├── db.py              # SQLAlchemy 2.0 AsyncEngine session factory
+│       │   └── repositories/      # SQL repositories (Org, Workflow, Version, Submission)
+│       │       ├── org_repo.py
+│       │       ├── workflow_repo.py
+│       │       └── submission_repo.py
+│       │
+│       ├── api/                   # HTTP Routers & Middleware (FastAPI layer)
+│       │   ├── __init__.py
+│       │   ├── dependencies.py    # FastAPI Dependency Injection (get_db, get_session_repo)
+│       │   ├── middleware/
+│       │   │   ├── auth.py        # API key verification middleware
+│       │   │   ├── logging.py     # Request-ID injection & structured JSON logging
+│       │   │   └── idempotency.py # Idempotency header enforcement middleware
+│       │   └── v1/
+│       │       ├── router.py      # V1 API Router aggregator
+│       │       ├── workflows.py   # Authoring endpoints (/v1/workflows)
+│       │       ├── sessions.py    # REST session execution (/v1/sessions)
+│       │       └── ussd.py        # USSD webhook endpoints (/v1/ussd/*)
+│       │
+│       └── cli/                   # Developer Tooling & Utilities
+│           ├── __init__.py
+│           └── simulator.py       # Interactive terminal USSD CLI simulator
+│
+└── tests/
+    ├── conftest.py                # Pytest fixtures & Testcontainers setup
+    ├── unit/
+    │   ├── test_dsl_parser.py     # Schema validation tests
+    │   ├── test_engine.py         # Pure state-machine evaluation tests
+    │   └── test_ussd_renderer.py  # CON/END string formatting tests
+    ├── integration/
+    │   ├── test_redis_session.py  # Redis TTL & optimistic locking tests
+    │   ├── test_workflow_repo.py  # Postgres CRUD & unique constraint tests
+    │   └── test_rest_api.py       # FastAPI HTTP client endpoint tests
+    ├── contract/
+    │   └── test_africas_talking.py# Africa's Talking payload contract fixtures
+    └── e2e/
+        └── test_full_ussd_flow.py # End-to-end simulated USSD sessions
 ```

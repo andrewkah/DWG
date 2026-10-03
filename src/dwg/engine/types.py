@@ -19,6 +19,6 @@ class SessionState:
 class EngineResult:    
     session: SessionState
     prompt: str
-    comment: Optional[str]
+    comment: Optional[str] = None
     is_terminal: bool = False
     

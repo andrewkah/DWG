@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ConditionModel(BaseModel):
@@ -16,14 +16,14 @@ class PromptModel(BaseModel):
     default: str = Field(..., min_length=1, max_length=320)
 
 class FieldValidationModel(BaseModel):
-    min_length: Optional[int] = Field(..., ge=1)
-    max_length: Optional[int] = Field(..., ge=1)
+    min_length: Optional[int] = Field(None, ge=1)
+    max_length: Optional[int] = Field(None, ge=1)
     min: Optional[int] = None
     max: Optional[int] = None
     pattern: Optional[str] = None
     
 class ChoiceOptionModel(BaseModel):
-    label: str = Field(..., min_length=1, max_length=64)
+    label: str = Field(..., min_length=3, max_length=150)
     value: Union[str, int, float, bool]
     
 
@@ -32,8 +32,14 @@ class FieldModel(BaseModel):
     type: Literal["text", "integer", "decimal", "boolean", "choice"]
     required: bool
     sensitive: bool = False
-    options: Optional[List[ChoiceOptionModel]] = Field(..., min_items=1,)
+    options: Optional[List[ChoiceOptionModel]] = Field(None, min_length=1)
     validation: Optional[FieldValidationModel] = None
+
+    @model_validator(mode="after")
+    def require_options_for_choice(self) -> "FieldModel":
+        if self.type == "choice" and not self.options:
+            raise ValueError("Choice fields require at least one option.")
+        return self
     
 class StateModel(BaseModel):
     id: str = Field(..., pattern=r"^[a-z0-9_]{1,64}$")
