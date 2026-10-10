@@ -1,6 +1,6 @@
 import copy
 from typing import Optional
-from dwg.domain.dsl import WorkflowDefinition
+from dwg.domain.dsl import WorkflowDSLModel
 from dwg.domain.errors import (
     ConcurrencyConflictError,
     SessionNotFoundError,
@@ -45,15 +45,15 @@ class InMemorySessionRepository(SessionRepository):
 class InMemoryWorkflowRepository(WorkflowRepository):
 
     def __init__(self):
-        self._definitions: dict[str, WorkflowDefinition] = {}
+        self._definitions: dict[str, WorkflowDSLModel] = {}
 
-    def get_version(self, version_id: str) -> Optional[WorkflowDefinition]:
+    def get_version(self, version_id: str) -> Optional[WorkflowDSLModel]:
         definition = self._definitions.get(version_id)
         if not definition:
             raise WorkflowVersionNotFoundError(version_id)
         return copy.deepcopy(definition)
 
     def save_version(
-        self, version_id: str, definition: WorkflowDefinition
+        self, version_id: str, definition: WorkflowDSLModel
     ) -> None:
         self._definitions[version_id] = copy.deepcopy(definition)

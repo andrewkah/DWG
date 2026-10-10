@@ -23,7 +23,7 @@ class FieldValidationModel(BaseModel):
     pattern: Optional[str] = None
     
 class ChoiceOptionModel(BaseModel):
-    label: str = Field(..., min_length=3, max_length=150)
+    label: str = Field(..., min_length=2, max_length=150)
     value: Union[str, int, float, bool]
     
 
@@ -54,7 +54,7 @@ class WorkflowDSLModel(BaseModel):
     dsl_schema_version: Literal["1.0"]
     workflow_id: str = Field(..., pattern=r"^[a-z0-9_-]{3,64}$")
     name: str = Field(..., min_length=3, max_length=128)
-    description: Optional[str] = Field(..., max_length=512)
+    description: Optional[str] = Field(None, max_length=512)
     start_state: str = Field(..., pattern=r"^[a-z0-9_]{1,64}$")
     states: List[StateModel]
     
