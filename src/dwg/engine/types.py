@@ -12,7 +12,7 @@ class SessionState:
     workflow_version_id: str
     status: str = 'ACTIVE' # ACTIVE, COMPLETED, CANCELLED, FAILED
     collected_data: dict[str, Any] = field(default_factory=dict)
-    row_version: int = 0
+    row_version: int = 1
     
     
 

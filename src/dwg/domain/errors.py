@@ -25,7 +25,7 @@ class SessionTerminatedError(DWGError):
     """ Custom error for a terminated session
     """
     def __init__(self, session_id: str, status: str):
-        super().__init_(f"Cannot execute turn: Session '{session_id}' is already in status '{status}'")
+        super().__init__(f"Cannot execute turn: Session '{session_id}' is already in status '{status}'")
         self.session_id = session_id
         self.status = status
         

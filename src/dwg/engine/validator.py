@@ -60,16 +60,35 @@ class InputValidator:
                     )
             return True, raw_str, None
 
-        # 3. Type: CHOICE (e.g. 1 -> Yes, 2 -> No)
+        # 3. Type: CHOICE (Supports USSD indices and API direct values/labels)
         elif field_def.type == "choice":
-            # If user sent numeric choice index "1", "2"
-            try:
-                idx = int(raw_str) - 1
-                if 0 <= idx < len(field_def.options):
-                    return True, field_def.options[idx].value, None
-            except ValueError:
-                pass
-            return False, None, "Invalid option selected. Please choose a valid number."
+            if not field_def.options:
+                return False, None, "No options configured for this choice."
+
+            val_str = str(raw_str).strip()
+
+            # A. Check if input matches an option's value directly (or stringified value)
+            for opt in field_def.options:
+                if opt.value == raw_str or str(opt.value).lower() == val_str.lower():
+                    return True, opt.value, None
+
+            # B. Check if input matches an option's label case-insensitively
+            for opt in field_def.options:
+                if opt.label.lower() == val_str.lower():
+                    return True, opt.value, None
+
+            # C. Check if input is a 1-based numeric choice index (USSD style: "1", "2")
+            if val_str.isdigit():
+                try:
+                    idx = int(val_str) - 1
+                    if 0 <= idx < len(field_def.options):
+                        return True, field_def.options[idx].value, None
+                except ValueError:
+                    pass
+
+            # Build clear error message showing valid choices
+            valid_choices = ", ".join([f"{i+1}. {opt.label}" for i, opt in enumerate(field_def.options)])
+            return False, None, f"Invalid option selected. Please choose from: {valid_choices}"
 
         return True, raw_str, None
     
@@ -85,33 +104,42 @@ class ConditionEvaluator:
     
     @model_validator(mode="after")
     def evaluate_operator_and_value_fit(condition: ConditionModel, collected_data: dict[str, Any]) -> bool|str:
-        field_value = collected_data.get(condition.field)
-        #   handle 'exists'
-        if condition.operator == "exists":
-            if condition.value is not None and not isinstance(condition.value, bool):
-                raise ValueError("The 'exists' operator requires a boolean value!")
-            return condition.field in collected_data
-        # Enforce a value for all other operators
-        elif field_value is None:
-            raise ValueError(f"Operator '{condition.operator}' requires a value.")
+        """
+        Evaluates a transition condition against accumulated session data.
+        """
+        field_val = collected_data.get(condition.field)
+        op = condition.operator
+        target_val = condition.value
 
-        # 3. Cross-field validation: 'in' and 'not_in' require an array (list)
-        elif condition.operator in ["in", "not_in"]:
-            if not isinstance(field_value, list):
-                raise ValueError(f"Operator '{condition.operator}' requires an array of values.")
-            if condition.operator == "in":
-                return field_value in condition.value
-            if condition.operator == "not in":
-                return field_value not in condition.value
-        
-        elif condition.operator == "gt":
-            return field_value is not None and field_value > condition.value
-        elif condition.operator == "gte":
-            return field_value is not None and field_value >= condition.value
-        elif condition.operator == "lt":
-            return field_value is not None and field_value < condition.value
-        elif condition.operator == "lte":
-            return field_value is not None and field_value <= condition.value
+        if op == "exists":
+            return field_val is not None
+
+        if field_val is None:
+            return False
+
+        # Normalize booleans vs string representations (e.g., True vs "true" / "1" / "yes")
+        if isinstance(target_val, bool) and isinstance(field_val, str):
+            field_val = field_val.strip().lower() in ("true", "1", "yes", "t", "y")
+        elif isinstance(target_val, str) and isinstance(field_val, bool):
+            target_val = target_val.strip().lower() in ("true", "1", "yes", "t", "y")
+
+        # Evaluate supported operators
+        if op == "equals":
+            return field_val == target_val
+        if op == "not_equals":
+            return field_val != target_val
+        if op == "gt":
+            return field_val > target_val
+        if op == "gte":
+            return field_val >= target_val
+        if op == "lt":
+            return field_val < target_val
+        if op == "lte":
+            return field_val <= target_val
+        if op == "in":
+            return field_val in target_val
+        if op == "not_in":
+            return field_val not in target_val
 
         return False
             
