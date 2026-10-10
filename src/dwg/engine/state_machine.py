@@ -78,7 +78,7 @@ class WorkflowEngine:
         # Work on the Confirm request
         elif current_state.kind == "confirm":
             # True=confirm, False=Cancel
-            if input == False:
+            if input in (False, "false", "False", 0, "0", "no"):
                 session.status = "CANCELLED"
                 return EngineResult(
                     session=session, prompt="Task cancelled!", is_terminal=True
