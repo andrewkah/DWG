@@ -37,7 +37,7 @@ class SessionService:
     def execute(
         self,
         session_id: str,
-        raw_input: str,
+        input: str,
     ) -> EngineResult:
         """ Coordinates a single turn of user interaction.
         """
@@ -58,7 +58,7 @@ class SessionService:
         result = self.engine.execute_turn(
             definition=definition,
             session=session,
-            raw_input=raw_input,
+            input=input,
         )
 
         # Atomically persist updated session

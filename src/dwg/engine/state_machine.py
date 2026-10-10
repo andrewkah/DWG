@@ -99,7 +99,7 @@ class WorkflowEngine:
         next_state = definition.get_state(next_state_id)
         session.current_state_id = next_state.id
         # session.transition_count += 1
-        # session.row_version += 1
+        session.row_version += 1
 
         # Work on the Terminal state
         if next_state.kind == "terminal":
