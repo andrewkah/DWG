@@ -38,4 +38,36 @@ class ErrorDetail(BaseModel):
 
 class ErrorEnvelope(BaseModel):
     error: ErrorDetail
- 
+
+
+from functools import lru_cache
+from dwg.engine.state_machine import WorkflowEngine
+from dwg.engine.services.session_service import SessionService
+from dwg.storage.redis_session import (InMemorySessionRepository, InMemoryWorkflowRepository)
+from dwg.storage.repositories.interfaces import (WorkflowRepository, SessionRepository)
+
+# API Dependencies
+@lru_cache(maxsize=1)
+def get_workflow_repository() -> WorkflowRepository:
+    """ Singleton workflow repository for process lifetime.
+    NOTE: In-memory sessions are lost upon process restart and not shared
+    across multi-worker processes.
+    """
+    return InMemoryWorkflowRepository()
+
+@lru_cache(maxsize=1)
+def get_session_repository() -> SessionRepository:
+    """Singleton session repository for process lifetime."""
+    return InMemorySessionRepository()
+
+
+def get_workflow_engine() -> WorkflowEngine:
+    return WorkflowEngine()
+
+
+def get_session_service() -> SessionService:
+    return SessionService(
+        engine=get_workflow_engine(),
+        session_repository=get_session_repository(),
+        workflow_repository=get_workflow_repository(),
+    )
