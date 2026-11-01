@@ -9,3 +9,8 @@ dependencies = [
 entrypoint="src.dwg.main:app"
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.0",
+]

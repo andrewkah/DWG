@@ -17,9 +17,9 @@ class SessionState:
     
 
 @dataclass
-class EngineResult:    
+class EngineResult:
     session: SessionState
     prompt: str
     comment: Optional[str] = None
     is_terminal: bool = False
-    
+    validation_error: Optional[str] = None

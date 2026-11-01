@@ -29,6 +29,7 @@ class WorkflowEngine:
             session=initial_session,
             prompt=start_state.prompt.default,
             is_terminal=is_terminal,
+            validation_error=None,
         )
 
     def _resolve_next_state(
@@ -55,6 +56,7 @@ class WorkflowEngine:
                 session=session,
                 prompt="Session is no longer active!",
                 is_terminal=True,
+                validation_error=None,
             )
 
         current_state = definition.get_state(session.current_state_id)
@@ -69,6 +71,7 @@ class WorkflowEngine:
                     session=session,
                     prompt=error_prompt,
                     is_terminal=(current_state.kind == "terminal"),
+                    validation_error=message,
                 )
             # save session data
             session.collected_data[current_state.field.name] = raw_string
@@ -79,7 +82,10 @@ class WorkflowEngine:
             if input in (False, "false", "False", 0, "0", "no"):
                 session.status = "CANCELLED"
                 return EngineResult(
-                    session=session, prompt="Task cancelled!", is_terminal=True
+                    session=session,
+                    prompt="Task cancelled!",
+                    is_terminal=True,
+                    validation_error=None,
                 )
         # Transition selection
         next_state_id = self._resolve_next_state(
@@ -91,6 +97,7 @@ class WorkflowEngine:
                 session=session,
                 prompt="System error: No valid transition path found!",
                 is_terminal=True,
+                validation_error=None,
             )
 
         # Advance state
@@ -106,10 +113,12 @@ class WorkflowEngine:
                 session=session,
                 prompt=next_state.prompt.default,
                 is_terminal=True,
+                validation_error=None,
             )
 
         return EngineResult(
             session=session,
             prompt=next_state.prompt.default,
             is_terminal=(next_state.kind == "terminal"),
+            validation_error=None,
         )
