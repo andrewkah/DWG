@@ -38,13 +38,13 @@ async def workflow_version_not_found_handler(
 
 async def session_terminated_handler(request: Request, exc: SessionTerminatedError):
     return create_error_response(
-        status.HTTP_409_CONFLICT, "SESSION_ALREADY_TERMIANTED", str(exc)
+        status.HTTP_409_CONFLICT, "SESSION_ALREADY_TERMINATED", str(exc)
     )
 
 
-async def concurency_conflict_handler(request: Request, exc: ConcurrencyConflictError):
+async def concurrency_conflict_handler(request: Request, exc: ConcurrencyConflictError):
     return create_error_response(
-        status.HTTP_409_CONFLICT, "COnCURENCY_CONFLICT", str(exc)
+        status.HTTP_409_CONFLICT, "CONCURRENCY_CONFLICT", str(exc)
     )
 
 

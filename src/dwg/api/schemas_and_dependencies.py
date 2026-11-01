@@ -1,6 +1,6 @@
 """ FastAPI Dependency Injection (get_db, get_session_repo)
 """
-    
+from fastapi import Depends
 from typing import Any, Optional
 from pydantic import BaseModel, Field
 
@@ -70,4 +70,13 @@ def get_session_service() -> SessionService:
         engine=get_workflow_engine(),
         session_repository=get_session_repository(),
         workflow_repository=get_workflow_repository(),
+    )
+def get_session_service(
+    session_repo: SessionRepository = Depends(get_session_repository),
+    workflow_repo: WorkflowRepository = Depends(get_workflow_repository),
+) -> SessionService:
+    return SessionService(
+        engine=get_workflow_engine(),
+        session_repository=session_repo,
+        workflow_repository=workflow_repo,
     )
