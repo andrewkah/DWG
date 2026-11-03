@@ -1,8 +1,8 @@
 
 
-from fastapi import Request
+from fastapi import Request, Response
 
-from dwg.adapters.ussd.base import CanonicalUSSDRequest, UssdProviderAdapter
+from dwg.adapters.ussd.base import CanonicalUSSDRequest, CanonicalUSSDResponse, USSDAction, UssdProviderAdapter
 
 
 class MockUssdAdapter(UssdProviderAdapter):
@@ -31,4 +31,8 @@ class MockUssdAdapter(UssdProviderAdapter):
             service_code=service_code,
             raw_input=text,
             is_new_session=is_new,)
-    
+        
+    def render_response(self, response: CanonicalUSSDResponse) -> Response:
+        # Standard GSM plain-text response: "CON <prompt>" or "END <prompt>"
+        prefix = "CON " if response.action == USSDAction.CON else "END "
+        return Response(content=f"{prefix}{response.message}", media_type="text/plain") 
