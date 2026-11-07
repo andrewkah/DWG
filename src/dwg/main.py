@@ -11,6 +11,7 @@ from dwg.api.middleware.exception_handlers import (
 )
 from dwg.api.v1.sessions import router as sessions_router
 from dwg.api.v1.router import dev_router
+from dwg.api.v1.ussd import ussd_router
 from dwg.domain.errors import (
     ConcurrencyConflictError,
     DWGError,
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
     # Mount v1 Routers
     app.include_router(sessions_router, prefix="/api/v1")
     app.include_router(dev_router, prefix="/api/v1")
+    app.include_router(ussd_router, prefix="/api/v1")
     
     return app
 
