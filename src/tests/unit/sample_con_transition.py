@@ -4,23 +4,28 @@ WORKFLOW_TRANSITIONS = {
         "SUBMIT": {
             "to": "UNDER_REVIEW",
             "guards": [lambda ctx: ctx.get("has_content", False)],
-            "actions": [lambda ctx: print("Notification: Document submitted for review.")]
+            "actions": [
+                lambda ctx: print("Notification: Document submitted for review.")
+            ],
         }
     },
     "UNDER_REVIEW": {
         "APPROVE": {
             "to": "APPROVED",
             "guards": [lambda ctx: ctx.get("approver_role") == "MANAGER"],
-            "actions": [lambda ctx: print("Notification: Document was approved!")]
+            "actions": [lambda ctx: print("Notification: Document was approved!")],
         },
         "REJECT": {
             "to": "DRAFT",
             "guards": [],
-            "actions": [lambda ctx: print("Notification: Document sent back to draft.")]
-        }
+            "actions": [
+                lambda ctx: print("Notification: Document sent back to draft.")
+            ],
+        },
     },
-    "APPROVED": {}  # Terminal state (No valid transitions out)
+    "APPROVED": {},  # Terminal state (No valid transitions out)
 }
+
 
 class WorkflowEngine:
     def __init__(self, transition_map: dict, initial_state: str):
@@ -54,14 +59,14 @@ class WorkflowEngine:
         The core transition function. Executes state change and actions.
         """
         allowed, result = self.can_transition(event, context)
-        
+
         if not allowed:
             raise ValueError(f"Transition Denied: {result}")
-        
+
         target_state = result
         transition_rule = self.transitions[self.current_state][event]
 
-        # Execute side-effect actions before shifting state safely 
+        # Execute side-effect actions before shifting state safely
         for action in transition_rule.get("actions", []):
             try:
                 action(context)
@@ -78,14 +83,14 @@ class WorkflowEngine:
 # Context simulating state variables or user metadata
 context_data = {
     "has_content": True,
-    "approver_role": "EMPLOYEE"  # Notice this is not a Manager!
+    "approver_role": "EMPLOYEE",  # Notice this is not a Manager!
 }
 
 # Initialize engine
 engine = WorkflowEngine(WORKFLOW_TRANSITIONS, initial_state="DRAFT")
 
 # 1. Submit the document
-engine.transition("SUBMIT", context_data) 
+engine.transition("SUBMIT", context_data)
 # Output: Notification: Document submitted for review.
 # Output: Transition Success: DRAFT -> UNDER_REVIEW
 
@@ -93,7 +98,7 @@ engine.transition("SUBMIT", context_data)
 try:
     engine.transition("APPROVE", context_data)
 except ValueError as e:
-    print(e) 
+    print(e)
     # Output: Transition Denied: Guard condition failed for event 'APPROVE'.
 
 # 3. Elevate user privileges in context and retry

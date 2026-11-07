@@ -41,6 +41,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
+
 @app.get("/")
 def read_root():
     return {"message": "Hello World"}
@@ -53,6 +54,7 @@ from fastapi.testclient import TestClient
 from main import app
 
 client = TestClient(app)
+
 
 def test_read_root():
     response = client.get("/")
@@ -71,6 +73,7 @@ Fixtures are reusable setup and teardown blocks. Creating a `conftest.py` file a
 import pytest
 from fastapi.testclient import TestClient
 from main import app
+
 
 @pytest.fixture
 def client():
@@ -104,8 +107,11 @@ from main import app
 
 # Use an in-memory SQLite database for fast isolated tests
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 @pytest.fixture(autouse=True)
 def setup_database():
@@ -114,28 +120,31 @@ def setup_database():
     yield
     Base.metadata.drop_all(bind=engine)
 
+
 @pytest.fixture
 def db_session():
     """Provides an isolated database session."""
     connection = engine.connect()
     transaction = connection.begin()
     session = TestingSessionLocal(bind=connection)
-    
+
     yield session
-    
+
     session.close()
     transaction.rollback()
     connection.close()
 
+
 @pytest.fixture
 def client(db_session):
     """Overrides the app's get_db dependency with the test database session."""
+
     def override_get_db():
         try:
             yield db_session
         finally:
             pass
-            
+
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:
         yield c
@@ -157,15 +166,18 @@ def test_protected_route_without_token(client):
     response = client.get("/users/me")
     assert response.status_code == 401
 
+
 def test_protected_route_with_token(client):
     # 1. Simulate logging in or generate a mock token
-    login_response = client.post("/token", data={"username": "testuser", "password": "password123"})
+    login_response = client.post(
+        "/token", data={"username": "testuser", "password": "password123"}
+    )
     token = login_response.json()["access_token"]
-    
+
     # 2. Pass the token inside the headers
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get("/users/me", headers=headers)
-    
+
     assert response.status_code == 200
     assert response.json()["username"] == "testuser"
 ```
@@ -177,13 +189,17 @@ If you want to skip generating a real token entirely during testing, you can moc
 ```python
 from main import get_current_user
 
+
 def test_admin_dashboard_with_mocked_user(client):
     # Mocking what the dependency returns
-    app.dependency_overrides[get_current_user] = lambda: {"username": "mockadmin", "role": "admin"}
-    
+    app.dependency_overrides[get_current_user] = lambda: {
+        "username": "mockadmin",
+        "role": "admin",
+    }
+
     response = client.get("/admin/dashboard")
     assert response.status_code == 200
-    
+
     # Clean up
     del app.dependency_overrides[get_current_user]
 ```

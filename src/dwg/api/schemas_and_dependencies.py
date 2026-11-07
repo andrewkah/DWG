@@ -1,18 +1,34 @@
-""" FastAPI Dependency Injection (get_db, get_session_repo)
-"""
+"""FastAPI Dependency Injection (get_db, get_session_repo)"""
+
+from typing import Any
+
 from fastapi import Depends
-from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 from dwg.domain.dsl import WorkflowDSLModel
 
+
 # API Schemas
 class StartSessionRequest(BaseModel):
-    workflow_version_id: str = Field(..., description="THe immutable version ID of the workflow to execute", examples=["wf-v1"],)
-    session_id: Optional[str] = Field(None, description="Optional client-provided unique session ID.", examples=["sess-100"],)
-        
+    workflow_version_id: str = Field(
+        ...,
+        description="THe immutable version ID of the workflow to execute",
+        examples=["wf-v1"],
+    )
+    session_id: str | None = Field(
+        None,
+        description="Optional client-provided unique session ID.",
+        examples=["sess-100"],
+    )
+
+
 class StepSessionRequest(BaseModel):
-    input: str = Field(..., description="The raw user submitted for the current turn.", examples=["James Grant"])
+    input: str = Field(
+        ...,
+        description="The raw user submitted for the current turn.",
+        examples=["James Grant"],
+    )
+
 
 class SessionResponse(BaseModel):
     session_id: str
@@ -22,7 +38,7 @@ class SessionResponse(BaseModel):
     prompt: str
     is_terminal: bool
     collected_data: dict[str, Any]
-    validation_error: Optional[str] = None
+    validation_error: str | None = None
 
 
 class RegisterDevWorkflowRequest(BaseModel):
@@ -33,7 +49,7 @@ class RegisterDevWorkflowRequest(BaseModel):
 class ErrorDetail(BaseModel):
     code: str
     message: str
-    details: Optional[Any] = None
+    details: Any | None = None
 
 
 class ErrorEnvelope(BaseModel):
@@ -41,19 +57,25 @@ class ErrorEnvelope(BaseModel):
 
 
 from functools import lru_cache
-from dwg.engine.state_machine import WorkflowEngine
+
 from dwg.engine.services.session_service import SessionService
-from dwg.storage.redis_session import (InMemorySessionRepository, InMemoryWorkflowRepository)
-from dwg.storage.repositories.interfaces import (WorkflowRepository, SessionRepository)
+from dwg.engine.state_machine import WorkflowEngine
+from dwg.storage.redis_session import (
+    InMemorySessionRepository,
+    InMemoryWorkflowRepository,
+)
+from dwg.storage.repositories.interfaces import SessionRepository, WorkflowRepository
+
 
 # API Dependencies
 @lru_cache(maxsize=1)
 def get_workflow_repository() -> WorkflowRepository:
-    """ Singleton workflow repository for process lifetime.
+    """Singleton workflow repository for process lifetime.
     NOTE: In-memory sessions are lost upon process restart and not shared
     across multi-worker processes.
     """
     return InMemoryWorkflowRepository()
+
 
 @lru_cache(maxsize=1)
 def get_session_repository() -> SessionRepository:
@@ -71,6 +93,8 @@ def get_session_service() -> SessionService:
         session_repository=get_session_repository(),
         workflow_repository=get_workflow_repository(),
     )
+
+
 def get_session_service(
     session_repo: SessionRepository = Depends(get_session_repository),
     workflow_repo: WorkflowRepository = Depends(get_workflow_repository),

@@ -1,5 +1,5 @@
 import copy
-from typing import Optional
+
 from dwg.domain.dsl import WorkflowDSLModel
 from dwg.domain.errors import (
     ConcurrencyConflictError,
@@ -11,7 +11,6 @@ from dwg.storage.repositories.interfaces import SessionRepository, WorkflowRepos
 
 
 class InMemorySessionRepository(SessionRepository):
-
     def __init__(self):
         self._sessions: dict[str, SessionState] = {}
 
@@ -19,7 +18,7 @@ class InMemorySessionRepository(SessionRepository):
         # Deepcopy simulates serializing to external storage
         self._sessions[session.session_id] = copy.deepcopy(session)
 
-    def get(self, session_id: str) -> Optional[SessionState]:
+    def get(self, session_id: str) -> SessionState | None:
         session = self._sessions.get(session_id)
         return copy.deepcopy(session) if session else None
 
@@ -43,17 +42,14 @@ class InMemorySessionRepository(SessionRepository):
 
 
 class InMemoryWorkflowRepository(WorkflowRepository):
-
     def __init__(self):
         self._definitions: dict[str, WorkflowDSLModel] = {}
 
-    def get_version(self, version_id: str) -> Optional[WorkflowDSLModel]:
+    def get_version(self, version_id: str) -> WorkflowDSLModel | None:
         definition = self._definitions.get(version_id)
         if not definition:
             raise WorkflowVersionNotFoundError(version_id)
         return copy.deepcopy(definition)
 
-    def save_version(
-        self, version_id: str, definition: WorkflowDSLModel
-    ) -> None:
+    def save_version(self, version_id: str, definition: WorkflowDSLModel) -> None:
         self._definitions[version_id] = copy.deepcopy(definition)

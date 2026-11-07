@@ -1,5 +1,4 @@
-""" Interactive terminal USSD CLI simulator
-"""
+"""Interactive terminal USSD CLI simulator"""
 
 import argparse
 import sys
@@ -55,9 +54,7 @@ def run_simulator(
             sys.exit(1)
 
         raw_response = res.text
-        if not (
-            raw_response.startswith("CON ") or raw_response.startswith("END ")
-        ):
+        if not (raw_response.startswith("CON ") or raw_response.startswith("END ")):
             print(f"[ERROR] Invalid telco response received:\n{raw_response}")
             sys.exit(1)
 
@@ -89,9 +86,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--url", default="http://127.0.0.1:8000", help="Base URL of DWG API"
     )
-    parser.add_argument(
-        "--code", default="*384*100#", help="Short code to dial"
-    )
+    parser.add_argument("--code", default="*384*100#", help="Short code to dial")
     parser.add_argument(
         "--phone", default="+256770123456", help="Subscriber phone number"
     )
@@ -104,4 +99,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run_simulator(args.url, args.code, args.phone, args.provider)
-

@@ -1,11 +1,15 @@
-from typing import Any, Tuple
+from typing import Any
+
+from pydantic import field_validator, model_validator
 
 from dwg.domain.dsl import ConditionModel, FieldModel
-from pydantic import field_validator, model_validator
+
 
 class InputValidator:
     @staticmethod
-    def validate_and_coerce(field_def: FieldModel, raw_input: Any) -> Tuple[bool, Any, str|None]:
+    def validate_and_coerce(
+        field_def: FieldModel, raw_input: Any
+    ) -> tuple[bool, Any, str | None]:
         """Returns (is_valid, coerced_value, error_message)"""
         if raw_input is None or str(raw_input).strip() == "":
             if field_def.required:
@@ -87,23 +91,42 @@ class InputValidator:
                     pass
 
             # Build clear error message showing valid choices
-            valid_choices = ", ".join([f"{i+1}. {opt.label}" for i, opt in enumerate(field_def.options)])
-            return False, None, f"Invalid option selected. Please choose from: {valid_choices}"
+            valid_choices = ", ".join(
+                [f"{i + 1}. {opt.label}" for i, opt in enumerate(field_def.options)]
+            )
+            return (
+                False,
+                None,
+                f"Invalid option selected. Please choose from: {valid_choices}",
+            )
 
         return True, raw_str, None
-    
+
+
 class ConditionEvaluator:
     """Validation model for workflow conditions."""
-    
+
     @field_validator("operator")
     @staticmethod
     def validate_operator(op: str) -> str:
-        if op not in ["equals", "not_equals", "gt", "gte", "lt", "lte", "in", "not_in", "exists"]:
-                raise ValueError(f"Invalid conditiona operator: {op}.")
+        if op not in [
+            "equals",
+            "not_equals",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "in",
+            "not_in",
+            "exists",
+        ]:
+            raise ValueError(f"Invalid conditiona operator: {op}.")
         return op
-    
+
     @model_validator(mode="after")
-    def evaluate_operator_and_value_fit(condition: ConditionModel, collected_data: dict[str, Any]) -> bool|str:
+    def evaluate_operator_and_value_fit(
+        condition: ConditionModel, collected_data: dict[str, Any]
+    ) -> bool | str:
         """
         Evaluates a transition condition against accumulated session data.
         """
@@ -142,4 +165,3 @@ class ConditionEvaluator:
             return field_val not in target_val
 
         return False
-            

@@ -1,5 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
+
+from dwg.adapters.ussd.ussd_service import UssdChannelService
 from dwg.api.schemas_and_dependencies import (
     get_session_repository,
     get_workflow_repository,
@@ -15,9 +17,8 @@ from dwg.domain.dsl import (
     TransitionModel,
     WorkflowDSLModel,
 )
-from dwg.main import create_app
 from dwg.engine.services.session_service import SessionService
-from dwg.adapters.ussd.ussd_service import UssdChannelService
+from dwg.main import create_app
 from dwg.storage.redis_session import (
     InMemorySessionRepository,
     InMemoryWorkflowRepository,
@@ -88,9 +89,7 @@ def kyc_workflow() -> WorkflowDSLModel:
                 id="employer_step",
                 kind="input",
                 prompt=PromptModel(default="Enter employer:"),
-                field=FieldModel(
-                    name="employer", type="text", required=True
-                ),
+                field=FieldModel(name="employer", type="text", required=True),
                 transitions=[TransitionModel(next="done_step")],
             ),
             StateModel(
@@ -104,7 +103,7 @@ def kyc_workflow() -> WorkflowDSLModel:
 
 
 @pytest.fixture
-def client(kyc_workflow) -> TestClient: # type: ignore
+def client(kyc_workflow) -> TestClient:  # type: ignore
     app = create_app()
 
     isolated_wf_repo = InMemoryWorkflowRepository()
@@ -117,9 +116,7 @@ def client(kyc_workflow) -> TestClient: # type: ignore
     from dwg.engine.state_machine import WorkflowEngine
 
     engine = WorkflowEngine()
-    session_service = SessionService(
-        engine, isolated_sess_repo, isolated_wf_repo
-    )
+    session_service = SessionService(engine, isolated_sess_repo, isolated_wf_repo)
     ussd_service = UssdChannelService(session_service, isolated_wf_repo)
 
     # Bind short code *384*100# to kyc-v1

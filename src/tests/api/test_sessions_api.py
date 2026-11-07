@@ -1,6 +1,7 @@
 # tests/api/test_sessions_api.py
 import pytest
 from fastapi.testclient import TestClient
+
 from dwg.api.schemas_and_dependencies import (
     get_session_repository,
     get_workflow_repository,
@@ -86,9 +87,7 @@ def sample_workflow() -> WorkflowDSLModel:
                 id="employer_step",
                 kind="input",
                 prompt=PromptModel(default="Enter employer:"),
-                field=FieldModel(
-                    name="employer", type="text", required=True
-                ),
+                field=FieldModel(name="employer", type="text", required=True),
                 transitions=[TransitionModel(next="complete_step")],
             ),
             StateModel(
@@ -113,12 +112,8 @@ def client(sample_workflow) -> TestClient:
     isolated_workflow_repo.save_version("wf-v1", sample_workflow)
 
     # Override dependencies
-    app.dependency_overrides[get_workflow_repository] = (
-        lambda: isolated_workflow_repo
-    )
-    app.dependency_overrides[get_session_repository] = (
-        lambda: isolated_session_repo
-    )
+    app.dependency_overrides[get_workflow_repository] = lambda: isolated_workflow_repo
+    app.dependency_overrides[get_session_repository] = lambda: isolated_session_repo
 
     with TestClient(app) as test_client:
         yield test_client
@@ -183,9 +178,7 @@ def test_input_validation_failure_stays_on_current_state(client):
         "/api/v1/sessions",
         json={"workflow_version_id": "wf-v1", "session_id": "sess-03"},
     )
-    client.post(
-        "/api/v1/sessions/sess-03/steps", json={"input": "Sarah Nabukeera"}
-    )
+    client.post("/api/v1/sessions/sess-03/steps", json={"input": "Sarah Nabukeera"})
 
     # Submit invalid age (< 18)
     res = client.post("/api/v1/sessions/sess-03/steps", json={"input": "15"})
@@ -230,9 +223,7 @@ def test_submission_to_completed_session_returns_409(client):
     client.post("/api/v1/sessions/sess-05/steps", json={"input": "2"})
 
     # Session is now COMPLETED. Next turn attempt must fail
-    res = client.post(
-        "/api/v1/sessions/sess-05/steps", json={"input": "Extra Input"}
-    )
+    res = client.post("/api/v1/sessions/sess-05/steps", json={"input": "Extra Input"})
     assert res.status_code == 409
     assert res.json()["error"]["code"] == "SESSION_ALREADY_TERMINATED"
 

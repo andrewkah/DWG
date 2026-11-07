@@ -1,6 +1,6 @@
 """State transition & condition evaluation engine"""
 
-from dwg.domain.dsl import WorkflowDSLModel, StateModel
+from dwg.domain.dsl import StateModel, WorkflowDSLModel
 from dwg.engine.types import EngineResult, SessionState
 from dwg.engine.validator import ConditionEvaluator, InputValidator
 
@@ -17,7 +17,9 @@ class WorkflowEngine:
         """Initializes a new session at the start_state"""
         start_state = definition.get_state(definition.start_state)
         is_terminal = start_state.kind == "terminal"
-        initial_status = (start_state.terminal_status or "COMPLETED") if is_terminal else "ACTIVE"
+        initial_status = (
+            (start_state.terminal_status or "COMPLETED") if is_terminal else "ACTIVE"
+        )
         initial_session = SessionState(
             session_id=session_id,
             current_state_id=start_state.id,

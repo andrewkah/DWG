@@ -1,13 +1,15 @@
-""" Africa's Talking webhook adapter
-"""
+"""Africa's Talking webhook adapter"""
 
 from fastapi import HTTPException, Request, Response, status
+
 from dwg.adapters.ussd.base import (
-    UssdProviderAdapter,
     CanonicalUSSDRequest,
     CanonicalUSSDResponse,
     USSDAction,
+    UssdProviderAdapter,
 )
+
+
 class AfricasTalkingAdapter(UssdProviderAdapter):
     def get_provider_name(self) -> str:
         return "africas_talking"
@@ -54,6 +56,4 @@ class AfricasTalkingAdapter(UssdProviderAdapter):
 
     def render_response(self, response: CanonicalUSSDResponse) -> Response:
         prefix = "CON " if response.action == USSDAction.CON else "END "
-        return Response(
-            content=f"{prefix}{response.message}", media_type="text/plain"
-        )
+        return Response(content=f"{prefix}{response.message}", media_type="text/plain")

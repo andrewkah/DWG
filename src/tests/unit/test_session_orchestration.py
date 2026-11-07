@@ -1,6 +1,7 @@
 import copy
 
 import pytest
+
 from dwg.domain.dsl import (
     ChoiceOptionModel,
     ConditionModel,
@@ -16,8 +17,8 @@ from dwg.domain.errors import (
     SessionNotFoundError,
     SessionTerminatedError,
 )
-from dwg.engine.state_machine import WorkflowEngine
 from dwg.engine.services.session_service import SessionService
+from dwg.engine.state_machine import WorkflowEngine
 from dwg.storage.redis_session import (
     InMemorySessionRepository,
     InMemoryWorkflowRepository,
@@ -108,9 +109,7 @@ def session_service(branching_workflow) -> SessionService:
     session_repo = InMemorySessionRepository()
 
     # Register pinned workflow version
-    workflow_repo.save_version(
-        version_id="wf-v1", definition=branching_workflow
-    )
+    workflow_repo.save_version(version_id="wf-v1", definition=branching_workflow)
 
     engine = WorkflowEngine()
     return SessionService(
@@ -165,9 +164,7 @@ def test_full_orchestration_happy_path(session_service, branching_workflow):
     assert res6.prompt == "Registration complete! Thank you."
 
 
-def test_cannot_execute_turn_on_completed_session(
-    session_service, branching_workflow
-):
+def test_cannot_execute_turn_on_completed_session(session_service, branching_workflow):
     """Verifies that SessionService blocks inputs to terminated sessions."""
     session_service.start(
         definition=branching_workflow,
@@ -205,9 +202,7 @@ def test_optimistic_concurrency_conflict(session_service, branching_workflow):
     # Worker A and Worker B both load session (version = 1)
     session_worker_a = session_service.sessions.get("sess-300")
     session_worker_b = session_service.sessions.get("sess-300")
-    assert (
-        session_worker_a.row_version == session_worker_b.row_version == 1
-    )
+    assert session_worker_a.row_version == session_worker_b.row_version == 1
 
     # Worker A updates session successfully (version increments to 2)
     session_worker_a.collected_data["full_name"] = "Sarah"

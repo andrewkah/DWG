@@ -3,6 +3,7 @@
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+
 from dwg.api.schemas_and_dependencies import ErrorDetail, ErrorEnvelope
 from dwg.domain.errors import (
     ConcurrencyConflictError,
@@ -63,6 +64,7 @@ async def generic_dwg_error_handler(request: Request, exc: DWGError):
     return create_error_response(
         status.HTTP_500_INTERNAL_SERVER_ERROR, "WORKFLOW_EXECUTION_ERROR", str(exc)
     )
+
 
 async def unhandled_exception_handler(request: Request, exc: Exception):
     return create_error_response(

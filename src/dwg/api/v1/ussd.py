@@ -1,5 +1,4 @@
-""" USSD webhook endpoints (/v1/ussd/*)
-"""
+"""USSD webhook endpoints (/v1/ussd/*)"""
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
@@ -7,10 +6,12 @@ from dwg.adapters.ussd.africas_talking import AfricasTalkingAdapter
 from dwg.adapters.ussd.base import UssdProviderAdapter
 from dwg.adapters.ussd.mock import MockUssdAdapter
 from dwg.adapters.ussd.ussd_service import UssdChannelService
-from dwg.api.schemas_and_dependencies import get_session_service, get_workflow_repository
+from dwg.api.schemas_and_dependencies import (
+    get_session_service,
+    get_workflow_repository,
+)
 from dwg.engine.services.session_service import SessionService
 from dwg.storage.repositories.interfaces import WorkflowRepository
-
 
 ussd_router = APIRouter(prefix="/ussd", tags=["USSD Webhooks"])
 
@@ -30,9 +31,7 @@ def get_ussd_channel_service(
 ) -> UssdChannelService:
     global _ussd_channel_service
     if _ussd_channel_service is None:
-        _ussd_channel_service = UssdChannelService(
-            session_service, workflow_repo
-        )
+        _ussd_channel_service = UssdChannelService(session_service, workflow_repo)
     return _ussd_channel_service
 
 

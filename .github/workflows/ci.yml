@@ -1,0 +1,41 @@
+name: DWG CI
+
+on:
+    pull_request:
+        branches: [main, develop]
+    push:
+        branches: [develop]
+
+permissions:
+    contents: read
+
+jobs:
+    quality:
+        name: Quality Checks
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+            
+            - name: Install uv
+              uses: astral-sh/setup-uv@v7
+              with:
+                # Auto cache uv environments
+                enable-cache: true
+                python-version: "3.12"
+
+            - name: Install dependencies
+              run: uv sync --locked
+
+            - name: Check formatting
+              run: uv run ruff format --check .
+
+            - name: Run linting
+              run: uv run ruff check .
+            
+            - name: Run Type Checker
+              run: uv run mypy .
+
+            - name: Run tests
+              run: uv run pytest -q

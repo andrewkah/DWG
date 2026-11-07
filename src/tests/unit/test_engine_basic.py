@@ -1,28 +1,55 @@
-
-from dwg.domain.dsl import FieldModel, FieldValidationModel, PromptModel, StateModel, TransitionModel, WorkflowDSLModel
+from dwg.domain.dsl import (
+    FieldModel,
+    FieldValidationModel,
+    PromptModel,
+    StateModel,
+    TransitionModel,
+    WorkflowDSLModel,
+)
 from dwg.engine.state_machine import WorkflowEngine
 
 
 def build_sample_workflow() -> WorkflowDSLModel:
-    return WorkflowDSLModel(dsl_schema_version = "1.0", workflow_id="onboarding", name="User Onboarding", description="User Onboarding workflow testing...", start_state="full_name", 
-                            states=[
-                                StateModel(
-                                    id="full_name", kind="input", prompt=PromptModel(default="Enter your full name:"),
-                                    field=FieldModel(name="full_name", type="text", required=True, sensitive=True, validation=FieldValidationModel(min_length=3, max_length=255)),
-                                    transitions=[TransitionModel(next="age")]
-                                ),
-                                StateModel(
-                                    id="age", kind="input", prompt=PromptModel(default="Enter your age:"),
-                                    field=FieldModel(name="age", type="integer", required=True, validation=FieldValidationModel(min=16)),
-                                    transitions=[TransitionModel(next="done")]
-                                ),
-                                StateModel(
-                                    id="done",
-                                    kind="terminal",
-                                    prompt=PromptModel(default="Thank you! Registration complete."),
-                                )
-                            ]
-                        )
+    return WorkflowDSLModel(
+        dsl_schema_version="1.0",
+        workflow_id="onboarding",
+        name="User Onboarding",
+        description="User Onboarding workflow testing...",
+        start_state="full_name",
+        states=[
+            StateModel(
+                id="full_name",
+                kind="input",
+                prompt=PromptModel(default="Enter your full name:"),
+                field=FieldModel(
+                    name="full_name",
+                    type="text",
+                    required=True,
+                    sensitive=True,
+                    validation=FieldValidationModel(min_length=3, max_length=255),
+                ),
+                transitions=[TransitionModel(next="age")],
+            ),
+            StateModel(
+                id="age",
+                kind="input",
+                prompt=PromptModel(default="Enter your age:"),
+                field=FieldModel(
+                    name="age",
+                    type="integer",
+                    required=True,
+                    validation=FieldValidationModel(min=16),
+                ),
+                transitions=[TransitionModel(next="done")],
+            ),
+            StateModel(
+                id="done",
+                kind="terminal",
+                prompt=PromptModel(default="Thank you! Registration complete."),
+            ),
+        ],
+    )
+
 
 def test_linear_worklflow_progression():
     engine = WorkflowEngine()
@@ -34,7 +61,9 @@ def test_linear_worklflow_progression():
     assert not first_res.is_terminal
     # Submit invalid name (too short)
     first_res2 = engine.execute_turn(workflow, first_res.session, input="J")
-    assert first_res2.session.current_state_id == "full_name" # Did not advance to next step
+    assert (
+        first_res2.session.current_state_id == "full_name"
+    )  # Did not advance to next step
     assert "Must be at least 3 characters" in first_res2.prompt
     # Submit Valid full name
     second_res = engine.execute_turn(workflow, first_res2.session, input="Jackson")
@@ -53,4 +82,3 @@ def test_linear_worklflow_progression():
     assert res5.is_terminal
     assert res5.session.collected_data["age"] == 25
     assert res5.prompt == "Thank you! Registration complete."
-    
