@@ -1,8 +1,8 @@
 """State transition & condition evaluation engine"""
 
 from dwg.domain.dsl import StateModel, WorkflowDSLModel
-from dwg.engine.workflow_types import EngineResult, SessionState
 from dwg.engine.validator import ConditionEvaluator, InputValidator
+from dwg.engine.workflow_types import EngineResult, SessionState
 
 
 class WorkflowEngine:
