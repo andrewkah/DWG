@@ -16,9 +16,7 @@ class Settings(BaseSettings):
         return v
 
     # Model config
-    model_config = SettingsConfigDict(
-        env_file=ROOT_DIRECTORY / ".env", env_file_encoding="utf-8", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=ROOT_DIRECTORY / ".env", env_file_encoding="utf-8", extra="ignore")
 
 
 settings = Settings()

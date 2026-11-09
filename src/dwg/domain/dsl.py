@@ -5,9 +5,7 @@ from pydantic import BaseModel, Field, model_validator
 
 class ConditionModel(BaseModel):
     field: str = Field(..., pattern=r"^[a-z0-9_]{1,64}$")
-    operator: Literal[
-        "equals", "not_equals", "gt", "gte", "lt", "lte", "in", "not_in", "exists"
-    ]
+    operator: Literal["equals", "not_equals", "gt", "gte", "lt", "lte", "in", "not_in", "exists"]
     value: str | bool | int | float | list[str | bool | float | int]
 
 

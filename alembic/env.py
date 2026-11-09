@@ -9,15 +9,16 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
+# Import Settings and Models
+from dwg.config import settings
+from dwg.domain.entities import Base  # All SQLAlchemy models register to Base.metadata
+
 # Path of the root directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 APP_DIR = BASE_DIR / "src"
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
-# Import Settings and Models
-from dwg.config import settings
-from dwg.domain.entities import Base  # All SQLAlchemy models register to Base.metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

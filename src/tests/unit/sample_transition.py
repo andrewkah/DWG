@@ -43,9 +43,7 @@ def get_next_state(current_state: State, action: Action) -> State:
     next_state = TRANSITION_TABLE.get((current_state, action))
 
     if not next_state:
-        raise WorkflowException(
-            f"Invalid transition: Cannot perform action '{action.name}' on state '{current_state.name}'"
-        )
+        raise WorkflowException(f"Invalid transition: Cannot perform action '{action.name}' on state '{current_state.name}'")
 
     return next_state
 
@@ -67,9 +65,7 @@ class WorkflowEngine:
         return self.state
 
     def _on_transition(self, source: State, action: Action, target: State):
-        print(
-            f"[Workflow] Transitioned successfully: {source.name} --({action.name})--> {target.name}"
-        )
+        print(f"[Workflow] Transitioned successfully: {source.name} --({action.name})--> {target.name}")
 
 
 # --- Example Usage ---

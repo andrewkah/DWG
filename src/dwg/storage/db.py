@@ -1,2 +1,1 @@
-    """ SQLAlchemy AsyncEngine session factory
-    """
+"""SQLAlchemy AsyncEngine session factory"""

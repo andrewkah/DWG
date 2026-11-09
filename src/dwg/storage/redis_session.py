@@ -6,7 +6,7 @@ from dwg.domain.errors import (
     SessionNotFoundError,
     WorkflowVersionNotFoundError,
 )
-from dwg.engine.types import SessionState
+from dwg.engine.workflow_types import SessionState
 from dwg.storage.repositories.interfaces import SessionRepository, WorkflowRepository
 
 

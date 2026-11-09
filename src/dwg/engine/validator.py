@@ -7,9 +7,7 @@ from dwg.domain.dsl import ConditionModel, FieldModel
 
 class InputValidator:
     @staticmethod
-    def validate_and_coerce(
-        field_def: FieldModel, raw_input: Any
-    ) -> tuple[bool, Any, str | None]:
+    def validate_and_coerce(field_def: FieldModel, raw_input: Any) -> tuple[bool, Any, str | None]:
         """Returns (is_valid, coerced_value, error_message)"""
         if raw_input is None or str(raw_input).strip() == "":
             if field_def.required:
@@ -30,19 +28,13 @@ class InputValidator:
                 )
 
             if field_def.validation:
-                if (
-                    field_def.validation.min is not None
-                    and val < field_def.validation.min
-                ):
+                if field_def.validation.min is not None and val < field_def.validation.min:
                     return (
                         False,
                         None,
                         f"Value must be at least {field_def.validation.min}.",
                     )
-                if (
-                    field_def.validation.max is not None
-                    and val > field_def.validation.max
-                ):
+                if field_def.validation.max is not None and val > field_def.validation.max:
                     return (
                         False,
                         None,
@@ -53,10 +45,7 @@ class InputValidator:
         # 2. Type: TEXT
         elif field_def.type == "text":
             if field_def.validation:
-                if (
-                    field_def.validation.min_length
-                    and len(raw_str) < field_def.validation.min_length
-                ):
+                if field_def.validation.min_length and len(raw_str) < field_def.validation.min_length:
                     return (
                         False,
                         None,
@@ -91,9 +80,7 @@ class InputValidator:
                     pass
 
             # Build clear error message showing valid choices
-            valid_choices = ", ".join(
-                [f"{i + 1}. {opt.label}" for i, opt in enumerate(field_def.options)]
-            )
+            valid_choices = ", ".join([f"{i + 1}. {opt.label}" for i, opt in enumerate(field_def.options)])
             return (
                 False,
                 None,
@@ -124,9 +111,7 @@ class ConditionEvaluator:
         return op
 
     @model_validator(mode="after")
-    def evaluate_operator_and_value_fit(
-        condition: ConditionModel, collected_data: dict[str, Any]
-    ) -> bool | str:
+    def evaluate_operator_and_value_fit(condition: ConditionModel, collected_data: dict[str, Any]) -> bool | str:
         """
         Evaluates a transition condition against accumulated session data.
         """

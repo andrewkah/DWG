@@ -107,9 +107,7 @@ def upgrade() -> None:
             ["workflows.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "workflow_id", "version_number", name="uq_workflow_version"
-        ),
+        sa.UniqueConstraint("workflow_id", "version_number", name="uq_workflow_version"),
     )
     op.create_table(
         "channel_bindings",

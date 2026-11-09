@@ -1,11 +1,19 @@
 """FastAPI Dependency Injection (get_db, get_session_repo)"""
 
+from functools import lru_cache
 from typing import Any
 
 from fastapi import Depends
 from pydantic import BaseModel, Field
 
 from dwg.domain.dsl import WorkflowDSLModel
+from dwg.engine.services.session_service import SessionService
+from dwg.engine.state_machine import WorkflowEngine
+from dwg.storage.redis_session import (
+    InMemorySessionRepository,
+    InMemoryWorkflowRepository,
+)
+from dwg.storage.repositories.interfaces import SessionRepository, WorkflowRepository
 
 
 # API Schemas
@@ -56,17 +64,6 @@ class ErrorEnvelope(BaseModel):
     error: ErrorDetail
 
 
-from functools import lru_cache
-
-from dwg.engine.services.session_service import SessionService
-from dwg.engine.state_machine import WorkflowEngine
-from dwg.storage.redis_session import (
-    InMemorySessionRepository,
-    InMemoryWorkflowRepository,
-)
-from dwg.storage.repositories.interfaces import SessionRepository, WorkflowRepository
-
-
 # API Dependencies
 @lru_cache(maxsize=1)
 def get_workflow_repository() -> WorkflowRepository:
@@ -85,14 +82,6 @@ def get_session_repository() -> SessionRepository:
 
 def get_workflow_engine() -> WorkflowEngine:
     return WorkflowEngine()
-
-
-def get_session_service() -> SessionService:
-    return SessionService(
-        engine=get_workflow_engine(),
-        session_repository=get_session_repository(),
-        workflow_repository=get_workflow_repository(),
-    )
 
 
 def get_session_service(

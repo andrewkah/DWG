@@ -14,9 +14,7 @@ from dwg.storage.repositories.interfaces import WorkflowRepository
 
 class ShortCodeNotBoundError(DWGError):
     def __init__(self, service_code: str):
-        super().__init__(
-            f"Service code '{service_code}' is not bound to any active workflow."
-        )
+        super().__init__(f"Service code '{service_code}' is not bound to any active workflow.")
         self.service_code = service_code
 
 
@@ -68,18 +66,12 @@ class UssdChannelService:
             # If the start is already terminal (rare)
             if exec_result.is_terminal:
                 self._correlations.pop(correlation_key, None)
-                return CanonicalUSSDResponse(
-                    action=USSDAction.END, message=exec_result.prompt
-                )
-            return CanonicalUSSDResponse(
-                action=USSDAction.CON, message=exec_result.prompt
-            )
+                return CanonicalUSSDResponse(action=USSDAction.END, message=exec_result.prompt)
+            return CanonicalUSSDResponse(action=USSDAction.CON, message=exec_result.prompt)
 
         # SUBSEQUENT INPUT TURNS
         try:
-            exec_result = self.session_service.execute(
-                session_id=internal_session_id, input=req.raw_input
-            )
+            exec_result = self.session_service.execute(session_id=internal_session_id, input=req.raw_input)
         except SessionNotFoundError:
             # Session expired from in-memory cache
             self._correlations.pop(correlation_key, None)
@@ -98,9 +90,7 @@ class UssdChannelService:
         if exec_result.is_terminal:
             # Cleanup correlation mapping
             self._correlations.pop(correlation_key, None)
-            return CanonicalUSSDResponse(
-                action=USSDAction.END, message=exec_result.prompt
-            )
+            return CanonicalUSSDResponse(action=USSDAction.END, message=exec_result.prompt)
 
         # Continue Interaction
         return CanonicalUSSDResponse(action=USSDAction.CON, message=exec_result.prompt)

@@ -61,9 +61,7 @@ def test_linear_worklflow_progression():
     assert not first_res.is_terminal
     # Submit invalid name (too short)
     first_res2 = engine.execute_turn(workflow, first_res.session, input="J")
-    assert (
-        first_res2.session.current_state_id == "full_name"
-    )  # Did not advance to next step
+    assert first_res2.session.current_state_id == "full_name"  # Did not advance to next step
     assert "Must be at least 3 characters" in first_res2.prompt
     # Submit Valid full name
     second_res = engine.execute_turn(workflow, first_res2.session, input="Jackson")

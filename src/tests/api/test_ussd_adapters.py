@@ -72,15 +72,11 @@ def kyc_workflow() -> WorkflowDSLModel:
                 ),
                 transitions=[
                     TransitionModel(
-                        condition=ConditionModel(
-                            field="employed", operator="equals", value=True
-                        ),
+                        condition=ConditionModel(field="employed", operator="equals", value=True),
                         next="employer_step",
                     ),
                     TransitionModel(
-                        condition=ConditionModel(
-                            field="employed", operator="equals", value=False
-                        ),
+                        condition=ConditionModel(field="employed", operator="equals", value=False),
                         next="done_step",
                     ),
                 ],

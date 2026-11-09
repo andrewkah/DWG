@@ -1,2 +1,1 @@
-    """ Idempotency header enforcement middleware
-    """
+"""Idempotency header enforcement middleware"""

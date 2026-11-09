@@ -107,9 +107,7 @@ from main import app
 
 # Use an in-memory SQLite database for fast isolated tests
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -169,9 +167,7 @@ def test_protected_route_without_token(client):
 
 def test_protected_route_with_token(client):
     # 1. Simulate logging in or generate a mock token
-    login_response = client.post(
-        "/token", data={"username": "testuser", "password": "password123"}
-    )
+    login_response = client.post("/token", data={"username": "testuser", "password": "password123"})
     token = login_response.json()["access_token"]
 
     # 2. Pass the token inside the headers

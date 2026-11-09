@@ -1,7 +1,7 @@
 from dwg.domain.dsl import WorkflowDSLModel
 from dwg.domain.errors import SessionNotFoundError, SessionTerminatedError
 from dwg.engine.state_machine import WorkflowEngine
-from dwg.engine.types import EngineResult, SessionState
+from dwg.engine.workflow_types import EngineResult, SessionState
 from dwg.storage.repositories.interfaces import SessionRepository, WorkflowRepository
 
 

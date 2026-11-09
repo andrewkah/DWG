@@ -4,9 +4,7 @@ WORKFLOW_TRANSITIONS = {
         "SUBMIT": {
             "to": "UNDER_REVIEW",
             "guards": [lambda ctx: ctx.get("has_content", False)],
-            "actions": [
-                lambda ctx: print("Notification: Document submitted for review.")
-            ],
+            "actions": [lambda ctx: print("Notification: Document submitted for review.")],
         }
     },
     "UNDER_REVIEW": {
@@ -18,9 +16,7 @@ WORKFLOW_TRANSITIONS = {
         "REJECT": {
             "to": "DRAFT",
             "guards": [],
-            "actions": [
-                lambda ctx: print("Notification: Document sent back to draft.")
-            ],
+            "actions": [lambda ctx: print("Notification: Document sent back to draft.")],
         },
     },
     "APPROVED": {},  # Terminal state (No valid transitions out)
@@ -72,7 +68,7 @@ class WorkflowEngine:
                 action(context)
             except Exception as e:
                 # In production, handle action failures (rollback or fail transition)
-                raise RuntimeError(f"Action failed during transition: {e}")
+                raise RuntimeError(f"Action failed during transition: {e}") from e
 
         # Finalize state update
         print(f"Transition Success: {self.current_state} -> {target_state}")

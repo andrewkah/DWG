@@ -25,9 +25,7 @@ class MockUssdAdapter(UssdProviderAdapter):
         subscriber_id = str(data.get("phone_number", "+256707483657"))
         service_code = str(data.get("service_code", "*234"))
         text = str(data.get("text", "")).strip()
-        is_new = (
-            data.get("is_new") is True or text == "" or data.get("is_new") == "true"
-        )
+        is_new = data.get("is_new") is True or text == "" or data.get("is_new") == "true"
         return CanonicalUSSDRequest(
             provider="mock",
             provider_session_id=provider_session_id,

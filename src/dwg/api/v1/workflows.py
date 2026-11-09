@@ -1,2 +1,1 @@
-    """ Authorising endpoints (/v1/workflows)
-    """
+"""Authorising endpoints (/v1/workflows)"""

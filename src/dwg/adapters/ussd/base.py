@@ -1,13 +1,13 @@
 """UssdProviderAdapter (Abstract SPI)"""
 
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import StrEnum
 
 from fastapi import Request, Response
 from pydantic import BaseModel
 
 
-class USSDAction(str, Enum):
+class USSDAction(StrEnum):
     CON = "CON"  # Telco keeps session open and awaits input
     END = "END"  # Telco displays message and closes connection
 

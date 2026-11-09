@@ -30,14 +30,10 @@ def create_app() -> FastAPI:
     )
     # Resgiter Exception Handlers
     app.add_exception_handler(SessionNotFoundError, session_not_found_handler)
-    app.add_exception_handler(
-        WorkflowVersionNotFoundError, workflow_version_not_found_handler
-    )
+    app.add_exception_handler(WorkflowVersionNotFoundError, workflow_version_not_found_handler)
     app.add_exception_handler(SessionTerminatedError, session_terminated_handler)
     app.add_exception_handler(ConcurrencyConflictError, concurrency_conflict_handler)
-    app.add_exception_handler(
-        RequestValidationError, request_validation_exception_handler
-    )
+    app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
     app.add_exception_handler(DWGError, generic_dwg_error_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)
 

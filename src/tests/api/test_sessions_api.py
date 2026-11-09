@@ -70,15 +70,11 @@ def sample_workflow() -> WorkflowDSLModel:
                 ),
                 transitions=[
                     TransitionModel(
-                        condition=ConditionModel(
-                            field="employed", operator="equals", value=True
-                        ),
+                        condition=ConditionModel(field="employed", operator="equals", value=True),
                         next="employer_step",
                     ),
                     TransitionModel(
-                        condition=ConditionModel(
-                            field="employed", operator="equals", value=False
-                        ),
+                        condition=ConditionModel(field="employed", operator="equals", value=False),
                         next="complete_step",
                     ),
                 ],
@@ -161,9 +157,7 @@ def test_successful_input_advances_state(client):
         json={"workflow_version_id": "wf-v1", "session_id": "sess-02"},
     )
 
-    step_res = client.post(
-        "/api/v1/sessions/sess-02/steps", json={"input": "Sarah Nabukeera"}
-    )
+    step_res = client.post("/api/v1/sessions/sess-02/steps", json={"input": "Sarah Nabukeera"})
     assert step_res.status_code == 200
     data = step_res.json()
     assert data["current_state_id"] == "age_step"

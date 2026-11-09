@@ -48,9 +48,7 @@ def run_simulator(
         try:
             res = requests.post(endpoint, data=payload, timeout=5)
         except requests.exceptions.ConnectionError:
-            print(
-                f"[ERROR] Could not connect to DWG API at {base_url}. Is FastAPI running?"
-            )
+            print(f"[ERROR] Could not connect to DWG API at {base_url}. Is FastAPI running?")
             sys.exit(1)
 
         raw_response = res.text
@@ -80,16 +78,10 @@ def run_simulator(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="DWG Interactive USSD Terminal Simulator"
-    )
-    parser.add_argument(
-        "--url", default="http://127.0.0.1:8000", help="Base URL of DWG API"
-    )
+    parser = argparse.ArgumentParser(description="DWG Interactive USSD Terminal Simulator")
+    parser.add_argument("--url", default="http://127.0.0.1:8000", help="Base URL of DWG API")
     parser.add_argument("--code", default="*384*100#", help="Short code to dial")
-    parser.add_argument(
-        "--phone", default="+256770123456", help="Subscriber phone number"
-    )
+    parser.add_argument("--phone", default="+256770123456", help="Subscriber phone number")
     parser.add_argument(
         "--provider",
         choices=["mock", "africas_talking"],

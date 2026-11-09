@@ -116,9 +116,7 @@ def get_session(
     definition = workflow_repo.get_version(session.workflow_version_id)
 
     # Resolve active prompt
-    active_state = next(
-        s for s in definition.states if s.id == session.current_state_id
-    )
+    active_state = next(s for s in definition.states if s.id == session.current_state_id)
 
     return SessionResponse(
         session_id=session.session_id,

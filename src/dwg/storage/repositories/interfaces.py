@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from dwg.domain.dsl import WorkflowDSLModel
-from dwg.engine.types import SessionState
+from dwg.engine.workflow_types import SessionState
 
 
 class SessionRepository(ABC):

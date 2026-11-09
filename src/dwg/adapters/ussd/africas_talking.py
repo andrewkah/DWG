@@ -17,11 +17,11 @@ class AfricasTalkingAdapter(UssdProviderAdapter):
     async def parse_request(self, request: Request) -> CanonicalUSSDRequest:
         try:
             form = await request.form()
-        except Exception:
+        except Exception as err:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Expected form-urlencoded payload from Africa's Talking",
-            )
+            ) from err
 
         session_id = form.get("sessionId")
         phone_number = form.get("phoneNumber")

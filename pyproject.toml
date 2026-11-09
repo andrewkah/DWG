@@ -19,14 +19,17 @@ dev = [
 [tool.ruff]
 # Target your specific Python version
 target-version = "py312"
-line-length = 88
+line-length = 258
 
 [tool.ruff.lint]
 # Enable a strong set of default rules
 # E/W = McCandless/pycodestyle, F = Pyflakes, I = isort, B = flake8-bugbear
 select = ["E", "W", "F", "I", "B", "UP"]
-ignore = []
+ignore = ["B008"]
 
 [tool.ruff.lint.pyupgrade]
 # Keeps your types modern (crucial for FastAPI + Pydantic)
 keep-runtime-typing = true
+
+[tool.mypy]
+mypy_path = ["src"]

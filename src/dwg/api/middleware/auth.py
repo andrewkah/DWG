@@ -1,2 +1,1 @@
-    """ API key verification middleware
-    """
+"""API key verification middleware"""

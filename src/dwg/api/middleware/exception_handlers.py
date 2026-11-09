@@ -14,44 +14,28 @@ from dwg.domain.errors import (
 )
 
 
-def create_error_response(
-    status_code: int, code: str, message: str, details=None
-) -> JSONResponse:
-    payload = ErrorEnvelope(
-        error=ErrorDetail(code=code, message=message, details=details)
-    )
+def create_error_response(status_code: int, code: str, message: str, details=None) -> JSONResponse:
+    payload = ErrorEnvelope(error=ErrorDetail(code=code, message=message, details=details))
     return JSONResponse(status_code=status_code, content=payload.model_dump())
 
 
 async def session_not_found_handler(request: Request, exc: SessionNotFoundError):
-    return create_error_response(
-        status.HTTP_404_NOT_FOUND, "SESSION_NOT_FOUND", str(exc)
-    )
+    return create_error_response(status.HTTP_404_NOT_FOUND, "SESSION_NOT_FOUND", str(exc))
 
 
-async def workflow_version_not_found_handler(
-    request: Request, exc: WorkflowVersionNotFoundError
-):
-    return create_error_response(
-        status.HTTP_404_NOT_FOUND, "WORKFLOW_VERSION_NOT_FOUND", str(exc)
-    )
+async def workflow_version_not_found_handler(request: Request, exc: WorkflowVersionNotFoundError):
+    return create_error_response(status.HTTP_404_NOT_FOUND, "WORKFLOW_VERSION_NOT_FOUND", str(exc))
 
 
 async def session_terminated_handler(request: Request, exc: SessionTerminatedError):
-    return create_error_response(
-        status.HTTP_409_CONFLICT, "SESSION_ALREADY_TERMINATED", str(exc)
-    )
+    return create_error_response(status.HTTP_409_CONFLICT, "SESSION_ALREADY_TERMINATED", str(exc))
 
 
 async def concurrency_conflict_handler(request: Request, exc: ConcurrencyConflictError):
-    return create_error_response(
-        status.HTTP_409_CONFLICT, "CONCURRENCY_CONFLICT", str(exc)
-    )
+    return create_error_response(status.HTTP_409_CONFLICT, "CONCURRENCY_CONFLICT", str(exc))
 
 
-async def request_validation_exception_handler(
-    request: Request, exc: RequestValidationError
-):
+async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
     return create_error_response(
         status.HTTP_400_BAD_REQUEST,
         "MALFORMED_REQUEST_BODY",
@@ -61,9 +45,7 @@ async def request_validation_exception_handler(
 
 
 async def generic_dwg_error_handler(request: Request, exc: DWGError):
-    return create_error_response(
-        status.HTTP_500_INTERNAL_SERVER_ERROR, "WORKFLOW_EXECUTION_ERROR", str(exc)
-    )
+    return create_error_response(status.HTTP_500_INTERNAL_SERVER_ERROR, "WORKFLOW_EXECUTION_ERROR", str(exc))
 
 
 async def unhandled_exception_handler(request: Request, exc: Exception):

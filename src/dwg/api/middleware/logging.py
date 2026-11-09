@@ -1,2 +1,1 @@
-    """ Request-ID injection & structured JSON logging
-    """
+"""Request-ID injection & structured JSON logging"""

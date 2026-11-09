@@ -1,2 +1,1 @@
-    """ Workflow SQL Repository
-    """
+"""Workflow SQL Repository"""

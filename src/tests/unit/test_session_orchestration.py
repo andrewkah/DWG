@@ -73,15 +73,11 @@ def branching_workflow() -> WorkflowDSLModel:
                 ),
                 transitions=[
                     TransitionModel(
-                        condition=ConditionModel(
-                            field="employed", operator="equals", value=True
-                        ),
+                        condition=ConditionModel(field="employed", operator="equals", value=True),
                         next="employer_step",
                     ),
                     TransitionModel(
-                        condition=ConditionModel(
-                            field="employed", operator="equals", value=False
-                        ),
+                        condition=ConditionModel(field="employed", operator="equals", value=False),
                         next="complete_step",
                     ),
                 ],
@@ -173,9 +169,7 @@ def test_cannot_execute_turn_on_completed_session(session_service, branching_wor
     )
     session_service.execute("sess-200", "Sarah")
     session_service.execute("sess-200", "28")
-    session_service.execute(
-        "sess-200", "2"
-    )  # Selects 'No' -> Routes directly to complete_step
+    session_service.execute("sess-200", "2")  # Selects 'No' -> Routes directly to complete_step
 
     # Session is now COMPLETED. Next execute should raise SessionTerminatedError
     with pytest.raises(SessionTerminatedError) as exc_info:
