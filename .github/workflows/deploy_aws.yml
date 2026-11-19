@@ -5,8 +5,6 @@ on:
         workflows: ["DWG CI"]
         types:
             - completed
-    pull_request:
-        branches: [main]
     push:
         branches: [main]
 
