@@ -1,7 +1,7 @@
 [project]
 name = "dwg-backend"
 version = "0.1.0"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     "fastapi[standard]>=0.141.1",
     "gunicorn>=27.0.1",
