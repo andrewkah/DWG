@@ -1,13 +1,17 @@
 import asyncio
+import sys
 from logging.config import fileConfig
+from pathlib import Path
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from pathlib import Path
-import sys, os
+
+# Import Settings and Models
+from dwg.config import settings
+from dwg.domain.entities import Base  # All SQLAlchemy models register to Base.metadata
 
 # Path of the root directory
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,9 +19,6 @@ APP_DIR = BASE_DIR / "src"
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
-# Import Settings and Models
-from dwg.config import settings
-from dwg.storage.models import Base  # All SQLAlchemy models register to Base.metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -39,6 +40,7 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # Injecting database URL (async capabilities)... etc.
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

@@ -4,6 +4,34 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.141.1",
+    "gunicorn>=27.0.1",
+    "pytest>=9.2.0",
 ]
 [tool.fastapi]
 entrypoint="src.dwg.main:app"
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.0",
+    "mypy>=2.4.1",
+    "ruff>=0.17.4",
+]
+[tool.ruff]
+# Target your specific Python version
+target-version = "py312"
+line-length = 258
+
+[tool.ruff.lint]
+# Enable a strong set of default rules
+# E/W = McCandless/pycodestyle, F = Pyflakes, I = isort, B = flake8-bugbear
+select = ["E", "W", "F", "I", "B", "UP"]
+ignore = ["B008"]
+
+[tool.ruff.lint.pyupgrade]
+# Keeps your types modern (crucial for FastAPI + Pydantic)
+keep-runtime-typing = true
+
+[tool.mypy]
+mypy_path = ["src"]

@@ -1,0 +1,90 @@
+name: DWG Deployment
+
+on:
+    workflow_run:
+        workflows: ["DWG CI"]
+        types:
+            - completed
+    push:
+        branches: [main]
+
+permissions:
+    contents: read
+
+env: 
+    APP_NAME: dwg-api
+    ENV_NAME: dwg-api-dev
+    S3_BUCKET: dwg-eb-deployments
+    BUNDLE_NAME: dwg-app-${{ github.sha }}.zip
+    ZIP_EXCLUDES: ""
+
+jobs:
+    deploy:
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Git checkout
+              uses: actions/checkout@v4
+
+            - name: Authenticate with AWS via OIDC
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+                aws-region: ${{ secrets.AWS_REGION }}
+
+            - name: Verify AWS Identity
+              run: aws sts get-caller-identity
+            
+            - name: Setup Python
+              uses: actions/setup-python@v5
+              with: 
+                python-version: "3.12"
+
+            - name: Export production dependencies
+              run: |
+                if [ -f pyproject.toml ] && command -v poetry > /dev/null 2>&1; then
+                    poetry export --only main --format requirements.txt --output requirements.txt --without-hashes
+                elif [ ! -f requirements.txt ]; then
+                    pip freeze > requirements.txt
+                fi
+
+            - name: Generate Deployment Package (ZIP)
+              run: |
+                # Zip code execluding git files, tests, and virtual enviroments
+                EXCLUDES=(
+                    ".git/*"
+                    ".github/*"
+                    "__pycache__/*"
+                    "*.pyc"
+                    ".venv/*"
+                    "venv/*"
+                    ".pytest_cache/*"
+                    ".mypy_cache/*"
+                    ".fastapicloud/*"
+                    ".ruff_cache/*"
+                    )
+                ZIP_ARGS=()
+                for pattern in "${EXCLUDES[@]}"; do
+                  ZIP_ARGS+=(-x "$pattern")
+                done
+                zip -r "${{ env.BUNDLE_NAME }}" . "${ZIP_ARGS[@]}"
+            
+            - name: Upload bundle to S3
+              run: |
+                aws s3 cp "${{ env.BUNDLE_NAME }}" "s3://${{ env.S3_BUCKET }}/${{ env.BUNDLE_NAME }}"
+
+            - name: Create Elastic Beanstalk application version
+              run: |
+                aws elasticbeanstalk create-application-version \
+                  --application-name "${{ env.APP_NAME }}" \
+                  --version-label "v-${{ github.sha }}" \
+                  --source-bundle "S3Bucket=${{ env.S3_BUCKET }}, S3Key=${{ env.BUNDLE_NAME }}" \
+                  --process
+            
+            - name: Update Elastic Beanstalk environment
+              run: |
+                aws elasticbeanstalk update-environment \
+                  --environment-name "${{ env.ENV_NAME }}" \
+                  --version-label "v-${{ github.sha }}"
+
