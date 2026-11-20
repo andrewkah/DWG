@@ -34,8 +34,5 @@ jobs:
             - name: Run linting
               run: uv run ruff check .
             
-            # - name: Run Type Checker
-            #   run: uv run mypy .
-
             - name: Run tests
               run: uv run pytest -q
