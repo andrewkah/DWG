@@ -5,23 +5,22 @@ on:
         workflows: ["DWG CI"]
         types:
             - completed
-permissions:
-  id-token: write
-  contents: read
-
 env: 
     APP_NAME: dwg-api
     ENV_NAME: dwg-api-dev
     S3_BUCKET: dwg-eb-deployments
     BUNDLE_NAME: dwg-app-${{ github.sha }}.zip
-    ZIP_EXCLUDES: ""
 
 jobs:
     deploy:
         if: >
           github.event.workflow_run.conclusion == 'success' &&
           github.event.workflow_run.head_branch == 'main'
+
         runs-on: ubuntu-latest
+        permissions:
+          id-token: write
+          contents: read
         
         steps:
             - name: Git checkout
