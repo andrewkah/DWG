@@ -20,6 +20,11 @@ jobs:
         steps:
             - name: Git checkout
               uses: actions/checkout@v5
+            
+            - name: Print OIDC logs
+              uses: github/actions-oidc-debugger@main
+              with:
+                audience: '${{ github.server_url }}/${{ github.repository_owner }}'
 
             - name: Authenticate with AWS via OIDC
               uses: aws-actions/configure-aws-credentials@v6
