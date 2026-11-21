@@ -1,1 +1,1 @@
-web: gunicorn -k uvicorn.workers.UvicornWorker main:app
+web: gunicorn -k uvicorn.workers.UvicornWorker --chdir src dwg.main:app --bind 0.0.0.0:8000
