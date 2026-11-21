@@ -20,12 +20,6 @@ jobs:
         steps:
             - name: Git checkout
               uses: actions/checkout@v5
-            - name: Debug GitHub Context
-              run: |
-                echo "Role=${{ secrets.AWS_ROLE_TO_ASSUME}}, AppName=${{ secrets.EB_APPLICATION_NAME }}, "
-                echo "Repository=${{ github.repository }}"
-                echo "Ref=${{ github.ref }}"
-                echo "Owner=${{ github.repository_owner }}"
 
             - name: Authenticate with AWS via OIDC
               uses: aws-actions/configure-aws-credentials@v6
