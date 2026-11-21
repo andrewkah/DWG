@@ -8,7 +8,8 @@ env:
     APP_NAME: dwg-api
     ENV_NAME: dwg-api-dev
     S3_BUCKET: dwg-eb-deployments
-    BUNDLE_NAME: dwg-app-${{ github.sha }}.zip
+    BUNDLE_NAME: dwg-app-${{ github.sha }}-${{ github.run_number }}-${{ github.run_attempt}}.zip
+    VERSION_LABEL: v-${{ github.sha }}-${{ github.run_number }}-${{ github.run_attempt}}
 
 jobs:
     deploy:
